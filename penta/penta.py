@@ -36,9 +36,9 @@ def logo():
   Web: https://takuzoo3868.github.io
   Last Modified: 28 April 2020.
 ==================================================
-- Penta is Pentest automation tool. It provides
-advanced features such as metasploit and nexpose
-to extract vuln info found on specific servers.
+- Penta is Pentest semi-automation tool. It
+provides advanced features such as metasploit to
+extract vuln info found on specific servers.
 =================================================={}
 """.format(Colors.LIGHTGREEN, Colors.BOLD, Colors.END)
     print(banner)
