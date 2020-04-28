@@ -42,14 +42,14 @@ class DailyReportor:
         self.edb_dao = EdbDAO(db_init.session)
         self.msf_dao = MsfDAO(db_init.session)
 
-    def print_table(self, records):
+    def print_cve_table(self, records):
         table = []
         check_list = []
         headers = ["ID", "CWE", "Severity", "Score", "Info"]
         for record in records:
             cve_id = record.cve_id
             problem_type = record.cve_problem_type
-            if record.cve_problem_type == "NVD-CWE-noinfo":
+            if "NVD-CWE-" in record.cve_problem_type:
                 problem_type = ""
             if cve_id not in check_list:
                 table.append(
@@ -105,35 +105,38 @@ class DailyReportor:
                 check_list.append(msf_id)
         print(tabulate(table, headers, tablefmt="grid"), flush=True)
 
+    # Obtaining the latest information
     def fetch_report(self):
-
         fetch_nvd = NvdCveCollector()
         fetch_edb = EdbCollector()
         fetch_msf = MsfCollector()
 
         fetch_nvd.recent()
         fetch_nvd.update()
-        fetch_edb.update()
+        fetch_edb.minor_update()
         fetch_msf.update()
 
         self.view_report()
 
+    # Output the data retrieved from the database
     def view_report(self):
         raw_today = datetime.now(timezone.utc)
         raw_day_before_yesterday = raw_today - timedelta(days=2)
         utc_today = raw_today.strftime("%Y-%m-%d")
         utc_yesterday = raw_day_before_yesterday.strftime("%Y-%m-%d")
 
+        # Obtaining CVEs with existing cvss scores in order of the latest update date
         cve_least_records = self.cve_dao.query(
             CveRecord,
             CveRecord.cve_cvssv3_score.isnot(None)).order_by(desc(CveRecord.cve_update_date)).limit(10).all()
 
         if len(cve_least_records) == 0:
-            logging.info("No scored CVEs in DB")
+            logging.info("No scored CVEs")
         else:
             logging.info("Last 10 Scored CVEs")
-            self.print_table(cve_least_records)
+            self.print_cve_table(cve_least_records)
 
+        # Obtaining EDB records for the last three days
         edb_records = self.edb_dao.query(EdbRecord, and_(
             EdbRecord.edb_published >= utc_yesterday,
             EdbRecord.edb_published <= utc_today
@@ -145,6 +148,7 @@ class DailyReportor:
             logging.info("Exploits published in the last 3days")
             self.print_edb_table(edb_records)
 
+        # Obtaining msf module records in order of the latest update date
         msf_records = self.msf_dao.query(MsfRecord).order_by(
             desc(MsfRecord.module_update_date)).limit(10).all()
 

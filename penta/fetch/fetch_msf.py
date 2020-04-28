@@ -1,4 +1,3 @@
-import collections
 import concurrent.futures
 import logging
 import os
@@ -136,9 +135,9 @@ class MsfCollector:
         if module_references is not None:
             cve_list = []
             edb_list = []
-            pattern = "CVE-\d{4}-\d+|EDB-\d+"
+            pattern = r"CVE-\d{4}-\d+|EDB-\d+"
             module_cve_edb_list = re.findall(pattern, module_references)
-            exclusion_pattern = "CVE-\d{4}-\d+,?|EDB-\d+,?"
+            exclusion_pattern = r"CVE-\d{4}-\d+,?|EDB-\d+,?"
             module_references = re.sub(exclusion_pattern, "", module_references)
 
             for item in module_cve_edb_list:
@@ -240,6 +239,7 @@ class MsfLocalCollector:
             logging.error("Metasploit module dir not exist")
 
     def fetch(self, msf_module_path):
+        logging.info("Fetching {}".format(msf_modules_path))
         self.select_module(msf_modules_path)
 
         try:
@@ -291,24 +291,24 @@ class MsfLocalCollector:
 
     def parse_msf_module_local(self, target_file):
         regex_pattern = {
-            'module_info': "initialize[\s\S]*?end\n",
-            'module_title': "['|\"]Name['|\"][ |\t|\S]+['|\"|\)]",
-            'module_describe': "['|\"]Description['|\"][\s\S]*?['|\"|\)],\n|['|\"]Description['|\"][^\}]+},\n",
-            'module_authors': "['|\"]Author['|\"][^\]]+\],\n|['|\"]Author['|\"][ |\t|\S]+['|\"|\)|\]],\n",
-            'module_cve': "['|\"]CVE['|\"],\s['|\"]\d{4}-\d+['|\"]",
-            'module_edb': "['|\"]EDB['|\"],\s['|\"]\d+['|\"]",
-            'module_cwe': "['|\"]CWE['|\"],\s['|\"]\d+['|\"]",
-            'module_bid': "['|\"]BID['|\"],\s['|\"]\d+['|\"]",
-            'module_zdi': "['|\"]ZDI['|\"],\s['|\"]\d{2}-\d+['|\"]",
-            'module_msb': "['|\"]MSB['|\"],\s['|\"]MS\d{2}-\d+['|\"]",
-            'module_osvdb': "['|\"]OSVDB['|\"],\s['|\"]\d+['|\"]",
-            'module_wpvdb': "['|\"]WPVDB['|\"],\s['|\"]\d+['|\"]",
-            'module_uscert': "['|\"]US-CERT-VU['|\"],\s['|\"]\S+['|\"]",
-            'module_packet': "['|\"]PACKETSTORM['|\"],\s['|\"]\S+['|\"]",
-            'module_ref_url': "['|\"]URL['|\"],\s['|\"]\S+['|\"]",
-            'module_platforms_fmt': "['|\"]Platform['|\"][ |\t]+=>[ |\t]%+[^\}]+},\n",
-            'module_platforms': "['|\"]Platform['|\"][ |\t|\S]+['|\"|\)|\]],\n|['|\"]Platform['|\"][^\}]+},\n",
-            'module_disclosure_date': "['|\"]DisclosureDate['|\"][ |\t|\S]+['|\"],*\n",
+            'module_info': r"initialize[\s\S]*?end\n",
+            'module_title': r"['|\"]Name['|\"][ |\t|\S]+['|\"|\)]",
+            'module_describe': r"['|\"]Description['|\"][\s\S]*?['|\"|\)],\n|['|\"]Description['|\"][^\}]+},\n",
+            'module_authors': r"['|\"]Author['|\"][^\]]+\],\n|['|\"]Author['|\"][ |\t|\S]+['|\"|\)|\]],\n",
+            'module_cve': r"['|\"]CVE['|\"],\s['|\"]\d{4}-\d+['|\"]",
+            'module_edb': r"['|\"]EDB['|\"],\s['|\"]\d+['|\"]",
+            'module_cwe': r"['|\"]CWE['|\"],\s['|\"]\d+['|\"]",
+            'module_bid': r"['|\"]BID['|\"],\s['|\"]\d+['|\"]",
+            'module_zdi': r"['|\"]ZDI['|\"],\s['|\"]\d{2}-\d+['|\"]",
+            'module_msb': r"['|\"]MSB['|\"],\s['|\"]MS\d{2}-\d+['|\"]",
+            'module_osvdb': r"['|\"]OSVDB['|\"],\s['|\"]\d+['|\"]",
+            'module_wpvdb': r"['|\"]WPVDB['|\"],\s['|\"]\d+['|\"]",
+            'module_uscert': r"['|\"]US-CERT-VU['|\"],\s['|\"]\S+['|\"]",
+            'module_packet': r"['|\"]PACKETSTORM['|\"],\s['|\"]\S+['|\"]",
+            'module_ref_url': r"['|\"]URL['|\"],\s['|\"]\S+['|\"]",
+            'module_platforms_fmt': r"['|\"]Platform['|\"][ |\t]+=>[ |\t]%+[^\}]+},\n",
+            'module_platforms': r"['|\"]Platform['|\"][ |\t|\S]+['|\"|\)|\]],\n|['|\"]Platform['|\"][^\}]+},\n",
+            'module_disclosure_date': r"['|\"]DisclosureDate['|\"][ |\t|\S]+['|\"],*\n",
         }
 
         file_obj = open(target_file, "r")
@@ -327,7 +327,7 @@ class MsfLocalCollector:
         module_describe = ' '.join(module_describe_words)
 
         # TODO: Efficient author's parsing method
-        module_authors = get_val(re.findall(regex_pattern['module_authors'], update_info_code))
+        # module_authors = get_val(re.findall(regex_pattern['module_authors'], update_info_code))
 
         module_cve = self.optimize_ref_id(get_val(re.findall(regex_pattern['module_cve'], update_info_code)))
         module_edb = self.optimize_ref_id(get_val(re.findall(regex_pattern['module_edb'], update_info_code)))
@@ -525,11 +525,11 @@ class MsfLocalCollector:
             comment_pos = rport_text.find("#")
             if comment_pos != -1:
                 rport_text = rport_text[:comment_pos]
-            regex_num = int(re.sub("\D", "", rport_text))
+            regex_num = int(re.sub(r"\D", "", rport_text))
 
             if 0 <= regex_num <= 65536:
                 rport_num = regex_num
-        except:
+        except IndexError:
             if "include Msf::Exploit::Remote::SMB::Client" in source_code:
                 rport_num = 445
             if "include Msf::Exploit::Remote::Ftp" in source_code:
@@ -548,7 +548,9 @@ class MsfLocalCollector:
         try:
             opt_date = elements[1].strip().replace(",", "").strip("'").strip('"')
             opt_date = time.strftime("%Y-%m-%d %H:%M:%S", time.strptime(opt_date, "%b %d %Y"))
-        except Exception:
+        except IndexError:
+            opt_date = None
+        except ValueError:
             opt_date = None
 
         return opt_date

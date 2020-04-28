@@ -34,7 +34,7 @@ def logo():
 ==================================================
   Author: @takuzoo3868
   Web: https://takuzoo3868.github.io
-  Last Modified: 14 April 2020.
+  Last Modified: 28 April 2020.
 ==================================================
 - Penta is Pentest automation tool. It provides
 advanced features such as metasploit and nexpose
@@ -47,8 +47,8 @@ to extract vuln info found on specific servers.
 def main_menu_list():
     print("[ ] === MENU LIST ===========================================")
     print("[0] EXIT")
-    print("[1] IP based scan")
-    print("[2] Vuln information DB")
+    print("[1] IP based scan menu")
+    print("[2] VulnDB construction menu")
 
 
 def ip_menu_list():
@@ -68,11 +68,12 @@ def ip_menu_list():
 def report_menu_list():
     print("[ ] === MENU LIST ===========================================")
     print("[0] Return to MAIN MENU")
-    print("[1] Test Fetch & Daily report")
-    print("[2] Test Display report")
-    print("[3] Test Fetch nvd.nist.gov")
-    print("[4] Test Fetch exploit-db.com")
-    print("[5] Test Fetch rapid7.com")
+    print("[1] Generate a daily report: CVE,EDB,MSF...")
+    print("[2] View a report")
+    print("[3] Fetch CVEs from nvd.nist")
+    print("[4] Fetch EDB records from exploit-db")
+    print("[5] Fetch MSF modules from rapid7")
+    print("[6] Fetch MSF modules from local")
 
 
 def choice_num():
@@ -114,7 +115,7 @@ def ip_menu(options):
 
     if options.target is None:
         while hostname == "":
-            hostname = input("[*] Specify IP or name domain:")
+            hostname = input("[>] Specify IP or name domain: ")
     else:
         hostname = options.target
 
@@ -138,37 +139,27 @@ def ip_menu(options):
 
             log_handler.save_logfile(log_filename, results)
             print("[+] {}{}{} was generated".format(Colors.LIGHTGREEN, log_filename, Colors.END))
-            print("\n")
 
         elif num_menu == 2:
             nmap_scan.nmap_menu(ip)
-            print("\n")
 
         elif num_menu == 3:
-            print("\n")
             checker.check_option_methods(hostname)
-            print("\n")
 
         elif num_menu == 4:
-            print("\n")
             dns_scan.check_dns_info(ip, hostname)
-            print("\n")
 
         elif num_menu == 5:
             shodan_search.shodan_host_info(ip)
-            print("\n")
 
         elif num_menu == 6:
             ftp_access.ftp_connect_anonymous(ip)
-            print("\n")
 
         elif num_menu == 7:
             ssh_access.ssh_connect(ip)
-            print("\n")
 
         elif num_menu == 8:
             msf_rpc_scan.scan(ip)
-            print("\n")
 
         elif num_menu == 9:
             # TODO: hydra brute force login --> smb ssh ftp http
@@ -176,13 +167,14 @@ def ip_menu(options):
             pass
 
         elif num_menu == 99:
-            hostname = input("[*] Specify IP or name domain:")
+            hostname = input("[*] Specify IP or name domain: ")
             print("[*] Get IP address from host name...")
             ip = socket.gethostbyname(hostname)
             print('[+] The IP address of {} is {}{}{}\n'.format(hostname, Colors.LIGHTGREEN, ip, Colors.END))
 
         else:
             logging.error("Incorrect option")
+        ip_menu_list()
 
 
 def report_menu(options):
@@ -201,43 +193,26 @@ def report_menu(options):
             main_menu(options)
 
         elif num_menu == 1:
-            print("[TEST] start...")
             report.fetch_report()
-            print("[TEST] done")
-            sys.exit(0)
 
         elif num_menu == 2:
-            print("[TEST] start...")
             report.view_report()
-            print("[TEST] done")
-            sys.exit(0)
 
         elif num_menu == 3:
-            print("[TEST] start...")
-            fetch_nvd.download_last_two_years()
-            print("[TEST] done")
-            sys.exit(0)
+            fetch_nvd.download()
 
         elif num_menu == 4:
-            print("[TEST] start...")
-            fetch_edb.update()
-            print("[TEST] done")
-            sys.exit(0)
+            fetch_edb.major_update()
 
         elif num_menu == 5:
-            print("[TEST] start...")
             fetch_msf.update()
-            print("[TEST] done")
-            sys.exit(0)
 
         elif num_menu == 6:
-            print("[TEST] start...")
             fetch_msf_local.update()
-            print("[TEST] done")
-            sys.exit(0)
 
         else:
             logging.error("Incorrect option")
+        report_menu_list()
 
 
 def main():

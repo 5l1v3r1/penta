@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.sql import exists
 
-DB_CONNECT_STRING = 'sqlite:///vuln_db.sqlite3'
+DB_CONNECT_STRING = 'sqlite:///data/vuln_db.sqlite3'
 
 
 class DBInit():

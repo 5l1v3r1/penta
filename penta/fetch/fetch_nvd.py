@@ -23,14 +23,28 @@ class NvdCveCollector:
         db_init = DBInit()
         self.cve_dao = CveDAO(db_init.session)
 
+    # Download CVE files
+    def download(self):
+        logging.info("Downloads the CVE from the specified year to the present")
+
+        while True:
+            from_year = input("[>] Specify Year from 2002 to last year: ")
+            try:
+                from_year = int(from_year)
+            except ValueError:
+                print("[-] Please enter the year as a number")
+                continue
+
+            if 2002 <= from_year < now.year:
+                self.download_years(from_year)
+                break
+
+            print("[-] Specify Year from 2002 to LAST YAER. e.g. 2019")
+
     # Download the file from the specified year to the present
     def download_years(self, start_year):
         for y in range(now.year, int(start_year) - 1, -1):
             self.fetch(y)
-
-    # Download CVE files for the last two years
-    def download_last_two_years(self):
-        return self.download_years(start_year=now.year - 1)
 
     # Download recent CVE files
     def recent(self):
