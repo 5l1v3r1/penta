@@ -99,7 +99,9 @@ class DBHelper():
     def to_dict(self, row):
         dict_record = {}
         for column in row.__table__.columns:
-            dict_record[column.name] = getattr(row, column.name)
+            data = getattr(row, column.name)
+            if data is not None:
+                dict_record[column.name] = data
 
         return dict_record
 
@@ -112,7 +114,7 @@ class CveDAO(DBHelper):
     def update(self, record):
         response = self.query(CveRecord, and_(
             CveRecord.cve_id == record.cve_id,
-            CveRecord.cve_update_date != record.cve_update_date
+            CveRecord.cve_update_date.isnot(record.cve_update_date)
         ))
         status = response.first()
 
@@ -133,7 +135,7 @@ class EdbDAO(DBHelper):
     def update(self, record):
         response = self.query(EdbRecord, and_(
             EdbRecord.edb_id == record.edb_id,
-            EdbRecord.edb_verified != record.edb_verified
+            EdbRecord.edb_verified.isnot(record.edb_verified)
         ))
         status = response.first()
 
@@ -154,7 +156,7 @@ class MsfDAO(DBHelper):
     def update(self, record):
         response = self.query(MsfRecord, and_(
             MsfRecord.module_name == record.module_name,
-            MsfRecord.module_update_date != record.module_update_date
+            MsfRecord.module_update_date.isnot(record.module_update_date)
         ))
         status = response.first()
 

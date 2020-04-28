@@ -5,7 +5,7 @@ import socket
 import sys
 
 from fetch.fetch_edb import EdbCollector
-from fetch.fetch_msf import MsfCollector
+from fetch.fetch_msf import MsfCollector, MsfLocalCollector
 from fetch.fetch_nvd import NvdCveCollector
 from modules.inspector import Inspect
 from modules.report_vuln import DailyReportor
@@ -190,6 +190,7 @@ def report_menu(options):
 
     fetch_nvd = NvdCveCollector()
     fetch_msf = MsfCollector()
+    fetch_msf_local = MsfLocalCollector()
     fetch_edb = EdbCollector()
     report = DailyReportor()
 
@@ -225,7 +226,13 @@ def report_menu(options):
 
         elif num_menu == 5:
             print("[TEST] start...")
-            fetch_msf.traverse()
+            fetch_msf.update()
+            print("[TEST] done")
+            sys.exit(0)
+
+        elif num_menu == 6:
+            print("[TEST] start...")
+            fetch_msf_local.update()
             print("[TEST] done")
             sys.exit(0)
 

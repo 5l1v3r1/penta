@@ -126,7 +126,7 @@ class DailyReportor:
 
         cve_least_records = self.cve_dao.query(
             CveRecord,
-            CveRecord.cve_cvssv3_score is not None).order_by(desc(CveRecord.cve_update_date)).limit(10).all()
+            CveRecord.cve_cvssv3_score.isnot(None)).order_by(desc(CveRecord.cve_update_date)).limit(10).all()
 
         if len(cve_least_records) == 0:
             logging.info("No scored CVEs in DB")

@@ -57,6 +57,7 @@ class MsfRecord(Base):
     __tablename__ = 'msf_records'
 
     module_name = Column(String(255), primary_key=True)
+    module_class = Column(String(55))
     module_title = Column(String(255))
     module_url = Column(String(255))
     module_describe = Column(Text)
@@ -66,5 +67,7 @@ class MsfRecord(Base):
     module_references = Column(Text)
     module_platforms = Column(String(55))
     module_architectures = Column(String(55))
+    module_remote_ports = Column(String(55))
+    module_disclosure_date = Column(String(25))
     module_update_date = Column(String(25), index=True)
     module_collect_date = Column(String(25))

@@ -13,7 +13,7 @@ import ujson
 from utils import get_random_user_agent, get_val
 
 now = datetime.datetime.now()
-get_record_len = "200"
+get_record_len = "50"
 
 
 class EdbCollector:
@@ -76,7 +76,7 @@ class EdbCollector:
         logging.info("Fetched {} Exploits list".format(len(items)))
         logging.info("Inserting fetched Exploits...")
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             futures = {executor.submit(self.parse_edb_cve, item): item for item in items}
 
             for f in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
